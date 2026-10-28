@@ -187,7 +187,7 @@ This wallet holds the full key; anyone with root on this machine plus the passwo
     printf 'XEL_WALLET_PASSWORD=%s\nXEL_RPC_PASSWORD=%s\n' "$pw" "$rpcpass" > "$ETC/xel.env"
     say "Xelis: creating the wallet (first run also builds ~330 MB of decryption tables; can take minutes)"
     sudo -u "$SVC_USER" sh -c 'cd "$1" && exec "$2" --wallet-path "$1/wallet" --password "$3" --seed "$4" \
-      --daemon-address "$5" --precomputed-tables-path "$1/tables" --precomputed-tables-l1 "$6" \
+      --daemon-address "$5" --precomputed-tables-path "$1/tables/" --precomputed-tables-l1 "$6" \
       --logs-path "$1/logs/" --disable-interactive-mode --disable-ascii-art' _ \
       "$DATA/xel" "$OPT/xelis/xelis_wallet" "$pw" "$seed" "$XEL_DAEMON" "$XEL_TABLES_L1" &
     local restore_pid=$!
@@ -214,7 +214,7 @@ After=network-online.target
 User=$SVC_USER
 EnvironmentFile=$ETC/xel.env
 WorkingDirectory=$DATA/xel
-ExecStart=$OPT/xelis/xelis_wallet --wallet-path $DATA/xel/wallet --password \${XEL_WALLET_PASSWORD} --daemon-address $XEL_DAEMON --rpc-bind-address 127.0.0.1:8081 --rpc-username fleet --rpc-password \${XEL_RPC_PASSWORD} --precomputed-tables-path $DATA/xel/tables --precomputed-tables-l1 $XEL_TABLES_L1 --logs-path $DATA/xel/logs/ --disable-interactive-mode --disable-ascii-art
+ExecStart=$OPT/xelis/xelis_wallet --wallet-path $DATA/xel/wallet --password \${XEL_WALLET_PASSWORD} --daemon-address $XEL_DAEMON --rpc-bind-address 127.0.0.1:8081 --rpc-username fleet --rpc-password \${XEL_RPC_PASSWORD} --precomputed-tables-path $DATA/xel/tables/ --precomputed-tables-l1 $XEL_TABLES_L1 --logs-path $DATA/xel/logs/ --disable-interactive-mode --disable-ascii-art
 Restart=always
 RestartSec=15
 Nice=10

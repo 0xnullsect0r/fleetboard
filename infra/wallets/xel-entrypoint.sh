@@ -6,7 +6,7 @@ set -euo pipefail
 : "${RPC_PASSWORD:?set XEL_WALLET_RPC_PASS in .env}"
 DAEMON="${XEL_DAEMON:-https://node.xelis.io}"
 L1="${XEL_TABLES_L1:-26}"
-common=(--precomputed-tables-path /data/tables --precomputed-tables-l1 "$L1" --logs-path /data/logs/
+common=(--precomputed-tables-path /data/tables/ --precomputed-tables-l1 "$L1" --logs-path /data/logs/
   --disable-interactive-mode --disable-ascii-art --daemon-address "$DAEMON")
 mkdir -p /data/tables /data/logs
 
