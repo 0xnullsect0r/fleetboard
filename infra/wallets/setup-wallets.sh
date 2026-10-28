@@ -140,7 +140,7 @@ After=network-online.target
 
 [Service]
 User=$SVC_USER
-ExecStart=$OPT/monero/monero-wallet-rpc --wallet-file $DATA/xmr/view --password-file $ETC/xmr.pass --daemon-address $XMR_NODE --rpc-bind-ip 127.0.0.1 --rpc-bind-port 18083 --disable-rpc-login --non-interactive --log-file $DATA/xmr/rpc.log --max-log-files 2
+ExecStart=$OPT/monero/monero-wallet-rpc --wallet-file $DATA/xmr/view --password-file $ETC/xmr.pass --daemon-address $XMR_NODE --rpc-bind-ip 127.0.0.1 --rpc-bind-port 18083 --disable-rpc-login --restricted-rpc --non-interactive --log-file $DATA/xmr/rpc.log --max-log-files 2
 Restart=always
 RestartSec=15
 Nice=10

@@ -40,20 +40,21 @@ async function readMonero(ep: WalletEndpoint, timeoutMs: number): Promise<Wallet
     rpc<{ balance: number; unlocked_balance: number }>(ep, "get_balance", { account_index: 0 }, timeoutMs),
     rpc<{ address: string }>(ep, "get_address", { account_index: 0 }, timeoutMs),
   ]);
-  // A view-only wallet has no spend key; query_key either errors or returns zeros.
-  let viewOnly = true;
+  // A view-only wallet returns an all-zero spend key. With --restricted-rpc,
+  // query_key is refused, so the wallet type is simply left unknown.
+  let viewOnly: boolean | undefined;
   try {
     const k = await rpc<{ key: string }>(ep, "query_key", { key_type: "spend_key" }, timeoutMs);
     viewOnly = /^0*$/.test(k.key);
   } catch {
-    viewOnly = true;
+    viewOnly = undefined;
   }
   return {
     coin: "XMR",
     address: addr.address,
     balance: bal.balance / ATOMIC.XMR,
     unlocked: bal.unlocked_balance / ATOMIC.XMR,
-    viewOnly,
+    ...(viewOnly !== undefined ? { viewOnly } : {}),
   };
 }
 

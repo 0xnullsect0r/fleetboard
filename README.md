@@ -188,11 +188,15 @@ They share a network only with the collector; web and Caddy cannot reach them.
 2. Restore each wallet once, then start the stack with the profile:
 
    ```sh
-   docker compose --profile wallets run --rm xmr-wallet restore
+   docker compose --profile wallets run --rm xmr-wallet restore        # view key (cannot spend)
+   # or: ... run --rm xmr-wallet restore-seed                          # 25 words (full key)
    docker compose --profile wallets run --rm xel-wallet restore
    docker compose --profile wallets up -d
    ```
 
+> The Monero RPC always runs with `--restricted-rpc` (balance and address
+> reads only, no transfers), even when restored from the 25 words.
+>
 > The XEL wallet on the server holds your spend key, and its password sits in
 > the server's `.env`. Root on the dashboard host, or a leak of `.env` plus the
 > volume, means the XEL funds can be taken. Running it only on the PC keeps the
