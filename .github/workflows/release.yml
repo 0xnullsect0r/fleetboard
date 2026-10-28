@@ -1,0 +1,118 @@
+# Push a v* tag -> test, publish multi-arch images to GHCR, compile agent
+# binaries, and cut a GitHub Release with the pinned compose file + installers.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run typecheck test
+
+  images:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web, collector, wallet-xmr, wallet-xel]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lowercase owner for GHCR
+        id: owner
+        run: echo "name=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.${{ matrix.app }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ steps.owner.outputs.name }}/fleetboard-${{ matrix.app }}:${{ github.ref_name }}
+            ghcr.io/${{ steps.owner.outputs.name }}/fleetboard-${{ matrix.app }}:latest
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+
+  agents:
+    needs: verify
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x64, linux-arm64, darwin-arm64, darwin-x64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @fleetboard/shared build
+      - name: Compile fleet-agent-${{ matrix.target }}
+        run: pnpm --filter @fleetboard/agent compile ${{ matrix.target }}
+        env:
+          AGENT_VERSION: ${{ github.ref_name }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fleet-agent-${{ matrix.target }}
+          path: packages/agent/bin/fleet-agent-${{ matrix.target }}
+          if-no-files-found: error
+
+  release:
+    needs: [images, agents]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fleet-agent-*
+          merge-multiple: true
+          path: dist
+      - name: Render compose file and installers
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"
+          sed -e "s/__TAG__/${GITHUB_REF_NAME}/g" \
+              -e "s/__OWNER__/${owner}/g" \
+              -e "s#__REPO__#${GITHUB_REPOSITORY}#g" \
+              infra/docker-compose.prod.tmpl.yml > dist/docker-compose.yml
+          for f in infra/install.sh infra/install-agent.sh infra/install-agent-macos.sh infra/wallets/setup-wallets.sh; do
+            sed "s#0xnullsect0r/CryptoDash#${GITHUB_REPOSITORY}#g" "$f" > "dist/$(basename "$f")"
+          done
+          chmod +x dist/*
+          (cd dist && sha256sum -- * > SHA256SUMS)
+          ls -la dist
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
