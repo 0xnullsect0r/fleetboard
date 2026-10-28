@@ -3,7 +3,10 @@ import { z } from "zod";
 const EnvSchema = z.object({
   TOKEN: z.string().min(16, "TOKEN must be at least 16 characters (openssl rand -hex 32)"),
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters (openssl rand -hex 32)"),
+  /** Unset = in-memory only (no history, no login seed). */
   DATABASE_URL: z.string().optional(),
+  /** Days of hashrate samples to keep. */
+  HISTORY_DAYS: z.coerce.number().int().positive().default(90),
   PORT: z.coerce.number().int().positive().default(4000),
   HOST: z.string().default("0.0.0.0"),
   DIFF_NODE: z.string().default("xmr.support:18081"),

@@ -4,4 +4,5 @@ packages:
 
 # Native/install scripts we trust; pnpm blocks all others.
 allowBuilds:
+  argon2: true
   esbuild: true

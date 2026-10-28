@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import websocket from "@fastify/websocket";
 import { AgentMessageSchema, type Snapshot } from "@fleetboard/shared";
-import Fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
+import Fastify, { LogController, type FastifyInstance, type FastifyRequest } from "fastify";
 import type { WebSocket } from "ws";
 import type { FleetState, IngestEvent } from "./state.js";
 
@@ -30,7 +30,12 @@ function tokenMatches(expected: Buffer, given: string): boolean {
 }
 
 export async function buildServer(opts: ServerOptions): Promise<FastifyInstance> {
-  const app = Fastify({ logger: { level: opts.logLevel ?? "info" }, trustProxy: true });
+  // Per-request lines are noise here; agent connect/disconnect is logged explicitly.
+  const app = Fastify({
+    logger: { level: opts.logLevel ?? "info" },
+    trustProxy: true,
+    logController: new LogController({ disableRequestLogging: true }),
+  });
   await app.register(websocket, { options: { maxPayload: 64 * 1024 } });
 
   const expectedToken = Buffer.from(opts.token);
