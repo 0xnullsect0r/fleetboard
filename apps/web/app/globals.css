@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/*
+ * Instrument-panel palette. One signal accent (phosphor amber); muted red is
+ * reserved for down/critical. Everything else is warm gray.
+ */
+:root {
+  --bg: #0b0c0e;
+  --panel: #111214;
+  --fg: #e8e6df;
+  --muted: #8b877c;
+  --dim: #5c5950;
+  --line: #24231f;
+  --line-strong: #3a3832;
+  --zebra: rgba(232, 230, 223, 0.022);
+  --accent: #ffb000;
+  --accent-soft: rgba(255, 176, 0, 0.14);
+  --crit: #c8503a;
+  color-scheme: dark;
+}
+
+/* Paper variant: same structure and hue, ink on bone. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f3f0e8;
+    --panel: #ebe7dc;
+    --fg: #1b1a17;
+    --muted: #6b675d;
+    --dim: #9a958a;
+    --line: #d9d4c7;
+    --line-strong: #bdb7a8;
+    --zebra: rgba(27, 26, 23, 0.03);
+    --accent: #a86f00;
+    --accent-soft: rgba(168, 111, 0, 0.14);
+    --crit: #b0412c;
+    color-scheme: light;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-zebra: var(--zebra);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-crit: var(--crit);
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* Live tick: a phosphor dot that decays like a CRT trace. */
+@keyframes phosphor {
+  0% { opacity: 1; }
+  70% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+.tick-live {
+  animation: phosphor 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tick-live { animation: none; }
+}
+
+/* uPlot sits flush inside readouts; hide its legend chrome. */
+.uplot .u-legend { display: none; }
