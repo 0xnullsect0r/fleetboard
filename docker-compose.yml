@@ -64,10 +64,10 @@ services:
     environment:
       CADDY_SITE_ADDRESS: ${CADDY_SITE_ADDRESS:-localhost}
     ports:
-      - "${BIND_ADDR:-127.0.0.1}:80:80"
-      - "${BIND_ADDR:-127.0.0.1}:443:443"
-      - "${BIND_ADDR:-127.0.0.1}:443:443/udp"
-      - "${BIND_ADDR:-127.0.0.1}:8080:8080"
+      - "${BIND_ADDR:-127.0.0.1}:${HTTP_PORT:-80}:80"
+      - "${BIND_ADDR:-127.0.0.1}:${HTTPS_PORT:-443}:443"
+      - "${BIND_ADDR:-127.0.0.1}:${HTTPS_PORT:-443}:443/udp"
+      - "${BIND_ADDR:-127.0.0.1}:${AGENT_PORT:-8080}:8080"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

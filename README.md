@@ -61,6 +61,25 @@ Caddy issues the certificate for `CADDY_SITE_ADDRESS`:
 
 The `Secure` session cookie needs HTTPS, so always use the `https://` URL.
 
+### Behind your own reverse proxy
+
+If another proxy (Nginx Proxy Manager, Traefik, a host-level Caddy) already
+terminates TLS, turn the bundled Caddy into a plain HTTP backend:
+
+```
+CADDY_SITE_ADDRESS=:80     # plain HTTP, any hostname, no certificates
+HTTP_PORT=8088             # any free host port if your proxy owns 80/443
+BIND_ADDR=127.0.0.1        # or the LAN/Tailscale IP your proxy reaches it on
+```
+
+Point the proxy at `http://<BIND_ADDR>:<HTTP_PORT>` with WebSocket support
+enabled. It must pass `Upgrade`/`Connection` and keep the `Host` header. The
+console needs `/ws/ui` and agents can use `/ws/agent` through it. Serve it
+over HTTPS, because the session cookie is `Secure`. No idle-timeout tuning is
+needed, since live updates flow every 3 seconds. Agents can then use
+`SERVER=wss://<your-domain>/ws/agent` instead of the plain `:8080` port. If
+the proxy is public, finish the first-login credential change before opening it.
+
 ### Automatic updates
 
 The release `docker-compose.yml` runs web and collector at `FLEETBOARD_TAG`
