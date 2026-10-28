@@ -106,7 +106,7 @@ jobs:
               -e "s#__REPO__#${GITHUB_REPOSITORY}#g" \
               infra/docker-compose.prod.tmpl.yml > dist/docker-compose.yml
           for f in infra/install.sh infra/install-agent.sh infra/install-agent-macos.sh infra/wallets/setup-wallets.sh; do
-            sed "s#0xnullsect0r/CryptoDash#${GITHUB_REPOSITORY}#g" "$f" > "dist/$(basename "$f")"
+            sed "s#0xnullsect0r/fleetboard#${GITHUB_REPOSITORY}#g" "$f" > "dist/$(basename "$f")"
           done
           chmod +x dist/*
           (cd dist && sha256sum -- * > SHA256SUMS)

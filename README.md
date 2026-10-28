@@ -30,8 +30,8 @@ On the server, which should be on your tailnet:
 
 ```sh
 mkdir fleetboard && cd fleetboard
-curl -fsSLO https://github.com/0xnullsect0r/CryptoDash/releases/latest/download/docker-compose.yml
-curl -fsSL https://raw.githubusercontent.com/0xnullsect0r/CryptoDash/main/.env.example -o .env
+curl -fsSLO https://github.com/0xnullsect0r/fleetboard/releases/latest/download/docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/0xnullsect0r/fleetboard/main/.env.example -o .env
 # edit .env: TOKEN, JWT_SECRET, POSTGRES_PASSWORD (openssl rand -hex 32 each),
 #            BIND_ADDR=<server's Tailscale IP>, CADDY_SITE_ADDRESS
 docker compose up -d
@@ -80,7 +80,7 @@ server's Tailscale IP on the plain agent port 8080, and `TOKEN` is the `TOKEN`
 from the server's `.env`.
 
 ```sh
-curl -fsSL https://github.com/0xnullsect0r/CryptoDash/releases/latest/download/install.sh \
+curl -fsSL https://github.com/0xnullsect0r/fleetboard/releases/latest/download/install.sh \
   | SERVER=ws://100.x.y.z:8080/ws/agent TOKEN=<TOKEN> NAME=<name> bash
 ```
 

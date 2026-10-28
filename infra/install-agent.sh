@@ -5,7 +5,7 @@
 # new values are passed. Usage: see install.sh; --uninstall removes everything.
 set -euo pipefail
 
-REPO="${REPO:-0xnullsect0r/CryptoDash}"
+REPO="${REPO:-0xnullsect0r/fleetboard}"
 VERSION="${VERSION:-latest}"
 PREFIX=/opt/fleet-agent
 ENV_FILE=/etc/fleet-agent.env

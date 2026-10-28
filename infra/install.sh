@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # FLEETBOARD agent installer: one command for every rig (Linux/systemd or macOS/launchd).
 #
-#   curl -fsSL https://github.com/0xnullsect0r/CryptoDash/releases/latest/download/install.sh \
+#   curl -fsSL https://github.com/0xnullsect0r/fleetboard/releases/latest/download/install.sh \
 #     | SERVER=ws://100.x.y.z:8080/ws/agent TOKEN=... NAME=garuda-pc bash
 #
 # Optional env: NAME (default: hostname), XMRIG_API, XMRIG_TOKEN, SRBMINER_API, INTERVAL,
 # XMR_WALLET_RPC, XEL_WALLET_RPC, XEL_WALLET_USER, XEL_WALLET_PASS,
-# REPO (default 0xnullsect0r/CryptoDash), VERSION (release tag, default latest),
+# REPO (default 0xnullsect0r/fleetboard), VERSION (release tag, default latest),
 # AGENT_FILE (install a local binary instead of downloading).
 # Pass --uninstall to remove the agent.
 set -euo pipefail
 
-REPO="${REPO:-0xnullsect0r/CryptoDash}"
+REPO="${REPO:-0xnullsect0r/fleetboard}"
 VERSION="${VERSION:-latest}"
 if [ "$VERSION" = "latest" ]; then
   BASE="https://github.com/${REPO}/releases/latest/download"
