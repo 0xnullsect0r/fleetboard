@@ -1,9 +1,12 @@
 import { HISTORY, isRange, type HistoryKind } from "@/lib/history";
+import { requireSession } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, ctx: { params: Promise<{ kind: string }> }) {
+  const session = await requireSession();
+  if (session instanceof Response) return session;
   const { kind } = await ctx.params;
   if (!(kind in HISTORY)) return Response.json({ error: "unknown history kind" }, { status: 404 });
   const range = new URL(req.url).searchParams.get("range") ?? "24h";

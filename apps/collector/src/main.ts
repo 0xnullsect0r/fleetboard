@@ -1,4 +1,5 @@
 import { readWallets, walletEndpointsFromEnv } from "@fleetboard/shared";
+import { uiAuthorizer } from "./auth.js";
 import { SampleWriter, createPool, migrate, pruneSamples, restoreState, seedUser } from "./db.js";
 import { loadEnv } from "./env.js";
 import { Market, liveSources } from "./market.js";
@@ -31,6 +32,7 @@ async function main() {
     token: env.TOKEN,
     state,
     logLevel: env.LOG_LEVEL,
+    authorizeUi: uiAuthorizer(env.JWT_SECRET),
     ...(writer ? { onIngest: (ev) => writer.handle(ev) } : {}),
     ...(pool ? { healthCheck: async () => void (await pool.query("SELECT 1")) } : {}),
   });

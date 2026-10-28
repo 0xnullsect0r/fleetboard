@@ -11,12 +11,15 @@
   },
   "dependencies": {
     "@fleetboard/shared": "workspace:*",
+    "argon2": "^0.45.1",
+    "jose": "^6.2.13",
     "next": "16.4.3",
     "pg": "^8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "server-only": "^0.0.1",
-    "uplot": "^1.6.32"
+    "uplot": "^1.6.32",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",

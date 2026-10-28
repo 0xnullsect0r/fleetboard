@@ -187,6 +187,9 @@ importers:
       fastify:
         specifier: ^5.12.7
         version: 5.12.7
+      jose:
+        specifier: ^6.2.13
+        version: 6.2.13
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -212,12 +215,21 @@ importers:
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+      ws:
+        specifier: ^8.22.0
+        version: 8.22.0
 
   apps/web:
     dependencies:
       '@fleetboard/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      argon2:
+        specifier: ^0.45.1
+        version: 0.45.1
+      jose:
+        specifier: ^6.2.13
+        version: 6.2.13
       next:
         specifier: 16.4.3
         version: 16.4.3(@types/node@24.19.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -236,6 +248,9 @@ importers:
       uplot:
         specifier: ^1.6.32
         version: 1.6.32
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
@@ -1123,6 +1138,9 @@ packages:
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
+
+  jose@6.2.13:
+    resolution: {integrity: sha512-7TIg10ZE1x82YediN+lcrPNvGMKge9yFHQD+Qho/b8y2adfugU3AsvvHfxV0fzyFllT6l9xCjf4RWY9g/Z9PJQ==}
 
   json-schema-ref-resolver@3.0.1:
     resolution: {integrity: sha512-w+HwgljXpVwZ3IidoUR1qPZxSOQ+NRQWuVe6a5pe8XbHsNZE4UAwVPUvzZagn7yBKbJtt6UJnRFYbNTRPZI45Q==}
@@ -2337,6 +2355,8 @@ snapshots:
   isexe@2.0.0: {}
 
   jiti@2.7.0: {}
+
+  jose@6.2.13: {}
 
   json-schema-ref-resolver@3.0.1:
     dependencies:
