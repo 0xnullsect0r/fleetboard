@@ -63,7 +63,8 @@ export function parseSrbminer(body: unknown): MinerReport | null {
   const shares = obj(algo?.shares);
   const gpus = [j?.gpu_devices, j?.devices, j?.gpus].find(Array.isArray) as unknown[] | undefined;
   const g = obj(gpus?.[0]);
-  const device = str(g?.model) ?? str(g?.name) ?? str(g?.device);
+  const model = str(g?.model) ?? str(g?.name) ?? str(g?.device);
+  const device = model ? prettyModel(model) : undefined;
 
   return {
     source: "srbminer",
@@ -77,6 +78,21 @@ export function parseSrbminer(body: unknown): MinerReport | null {
       ...(device ? { device } : {}),
     },
   };
+}
+
+const BRAND_WORDS: Record<string, string> = {
+  nvidia: "NVIDIA", geforce: "GeForce", rtx: "RTX", gtx: "GTX", amd: "AMD", radeon: "Radeon",
+  rx: "RX", xt: "XT", xtx: "XTX", gpu: "GPU", intel: "Intel", arc: "Arc", ti: "Ti",
+};
+
+/** SRBMiner reports models as "nvidia_geforce_rtx_4070_laptop_gpu"; make them readable. */
+export function prettyModel(raw: string): string {
+  if (!raw.includes("_") || raw.includes(" ")) return raw;
+  return raw
+    .split("_")
+    .filter(Boolean)
+    .map((w) => BRAND_WORDS[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 }
 
 async function getJson(url: string, timeoutMs: number, headers: Record<string, string> = {}): Promise<unknown> {

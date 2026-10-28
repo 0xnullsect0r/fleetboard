@@ -3,7 +3,7 @@ import type { AgentMessage, MinerReport, WalletReport } from "@fleetboard/shared
 import { describe, expect, it } from "vitest";
 import { Agent } from "../src/agent.js";
 import { assertLoopback, loadConfig, rigName } from "../src/config.js";
-import { parseSrbminer, parseXmrig } from "../src/miners.js";
+import { parseSrbminer, parseXmrig, prettyModel } from "../src/miners.js";
 
 const fixture = (f: string) => JSON.parse(readFileSync(new URL(`./fixtures/${f}`, import.meta.url), "utf8")) as unknown;
 
@@ -21,12 +21,17 @@ describe("parsers", () => {
     expect(r?.summary).toMatchObject({ h10: 1500, h60: 1500, h15: 1500, sharesRejected: 0 });
   });
 
-  it("parses SRBMiner-MULTI", () => {
+  it("parses a real SRBMiner-MULTI 3.8 response", () => {
     expect(parseSrbminer(fixture("srbminer.json"))).toEqual({
       source: "srbminer",
       coin: "XEL",
-      summary: { h10: 52144.2, h60: 51980.5, h15: 51877.1, sharesGood: 1287, sharesRejected: 4, device: "AMD Radeon RX 7900 XT" },
+      summary: { h10: 4665.69, h60: 4665.3, h15: 1514.72, sharesGood: 8, sharesRejected: 0, device: "NVIDIA GeForce RTX 4070 Laptop GPU" },
     });
+  });
+
+  it("prettifies snake_case GPU models only", () => {
+    expect(prettyModel("amd_radeon_rx_7900_xt")).toBe("AMD Radeon RX 7900 XT");
+    expect(prettyModel("AMD Radeon RX 7900 XT")).toBe("AMD Radeon RX 7900 XT");
   });
 
   it("falls back to hashrate_total_now and repeats h10", () => {

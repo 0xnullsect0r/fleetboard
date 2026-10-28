@@ -1,16 +1,41 @@
 {
-  "rig_name": "garuda-pc",
-  "miner_version": "2.9.8",
-  "mining_time": 86190,
-  "hashrate_total_now": 52144.2,
+  "rig_name": "SRBMiner-Multi-Rig",
+  "miner_version": "3.8.0",
+  "mining_time": 2667,
+  "total_cpu_workers": 0,
+  "total_gpu_workers": 1,
+  "total_workers": 1,
+  "cpu_devices": [{ "id": 0, "device": "cpu0", "model": "AMD Ryzen AI 9 365 w/ Radeon 880M" }],
+  "gpu_devices": [
+    {
+      "id": 0,
+      "topology_id": "0000:C4:00.0",
+      "bus_id": 196,
+      "device": "gpu0",
+      "vendor": "nvidia",
+      "model": "nvidia_geforce_rtx_4070_laptop_gpu",
+      "core_clock": 2385,
+      "memory_clock": 8001,
+      "temperature": 57,
+      "asic_power": 55
+    }
+  ],
   "algorithms": [
     {
       "id": 0,
       "name": "xelishashv3",
-      "hashrate": { "now": 52144.2, "gpu": { "total": 52144.2, "1min": 51980.5, "15min": 51877.1 }, "cpu": { "total": 0 } },
-      "shares": { "accepted": 1287, "rejected": 4, "total": 1291 },
-      "pool": { "pool": "xel.kryptex.network:7019", "difficulty": 600000 }
+      "pool": { "pool": "xel.kryptex.network:7019" },
+      "shares": { "total": 8, "accepted": 8, "rejected": 0, "avg_find_time": 334 },
+      "hashrate": {
+        "1min": 4665.3,
+        "15min": 1514.72,
+        "1hr": 2614.07,
+        "6hr": 2614.07,
+        "cpu": { "total": 0.0 },
+        "gpu": { "gpu0": 4665.69, "total": 4665.69 }
+      },
+      "gpu_accepted_shares": { "gpu0": 8 },
+      "gpu_rejected_shares": { "gpu0": 0 }
     }
-  ],
-  "gpu_devices": [{ "id": 0, "model": "AMD Radeon RX 7900 XT", "bus_id": "03:00.0", "temperature": 61 }]
+  ]
 }

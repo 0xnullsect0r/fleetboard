@@ -79,9 +79,11 @@ services:
         condition: service_healthy
     networks: [fleet]
 
-  # Polls GHCR every UPDATE_INTERVAL seconds; a new digest for the current tag
-  # recreates web/collector (migrations run on collector boot). db, caddy and
-  # wallets are never touched. Official Docker CLI image; needs the socket.
+  # Every UPDATE_INTERVAL seconds: pull web/collector for the current tag and
+  # recreate a service only if its image digest changed (migrations run on
+  # collector boot). db, caddy and wallets are never touched. Official Docker
+  # CLI image; needs the socket. Waits one interval first so it never races
+  # the initial "docker compose up".
   updater:
     image: docker:27-cli
     restart: unless-stopped
@@ -97,12 +99,20 @@ services:
       - |
         echo "updater: checking GHCR every $${UPDATE_INTERVAL}s"
         while :; do
-          if docker compose pull --quiet web collector; then
-            docker compose up -d --no-deps web collector 2>&1 | grep -E 'Recreat|Start' || true
-          else
-            echo "updater: pull failed (GHCR unreachable or packages private?)"
-          fi
           sleep "$${UPDATE_INTERVAL}"
+          if ! docker compose pull --quiet web collector >/dev/null 2>&1; then
+            echo "updater: pull failed (GHCR unreachable or packages private?)"
+            continue
+          fi
+          for svc in web collector; do
+            cid="$$(docker compose ps -q "$$svc")"
+            [ -n "$$cid" ] || continue
+            ref="$$(docker inspect -f '{{.Config.Image}}' "$$cid")"
+            if [ "$$(docker inspect -f '{{.Image}}' "$$cid")" != "$$(docker image inspect -f '{{.Id}}' "$$ref")" ]; then
+              echo "updater: new image for $$svc ($$ref), recreating"
+              docker compose up -d --no-deps "$$svc"
+            fi
+          done
         done
     networks: [fleet]
 
