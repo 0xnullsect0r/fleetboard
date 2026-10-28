@@ -29,6 +29,8 @@ export const MinerReportSchema = z.object({
  */
 export const WalletReportSchema = z.object({
   coin: CoinSchema,
+  /** Public receive address; identifies the wallet across reporters. */
+  address: z.string().min(1).max(512),
   balance: num.nonnegative(),
   unlocked: num.nonnegative().optional(),
   /** Wallet can only see incoming funds (Monero view-only wallet). */
@@ -75,9 +77,12 @@ export const MinerStateSchema = z.object({
   age: num,
 });
 
+/** One wallet, de-duplicated by (coin, address) across every reporter. */
 export const WalletStateSchema = z.object({
-  rig: z.string(),
   coin: CoinSchema,
+  address: z.string(),
+  /** Reporters (rig names, or "server") that saw this wallet recently. */
+  via: z.array(z.string()),
   ok: z.boolean(),
   balance: num,
   unlocked: num.optional(),

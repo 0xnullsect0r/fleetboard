@@ -40,7 +40,7 @@ describe("AgentMessage", () => {
   });
 
   it("accepts wallet balances alongside miners", () => {
-    const m = AgentMessageSchema.parse({ ...msg, miners: [], wallets: [{ coin: "XMR", balance: 0.42, unlocked: 0.4, viewOnly: true }] });
+    const m = AgentMessageSchema.parse({ ...msg, miners: [], wallets: [{ coin: "XMR", address: "4Abc", balance: 0.42, unlocked: 0.4, viewOnly: true }] });
     expect(m.wallets?.[0]?.coin).toBe("XMR");
   });
 

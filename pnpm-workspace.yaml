@@ -1,3 +1,7 @@
 packages:
   - apps/*
   - packages/*
+
+# Native/install scripts we trust; pnpm blocks all others.
+allowBuilds:
+  esbuild: true
