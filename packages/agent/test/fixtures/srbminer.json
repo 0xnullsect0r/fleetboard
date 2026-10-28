@@ -1,0 +1,16 @@
+{
+  "rig_name": "garuda-pc",
+  "miner_version": "2.9.8",
+  "mining_time": 86190,
+  "hashrate_total_now": 52144.2,
+  "algorithms": [
+    {
+      "id": 0,
+      "name": "xelishashv3",
+      "hashrate": { "now": 52144.2, "gpu": { "total": 52144.2, "1min": 51980.5, "15min": 51877.1 }, "cpu": { "total": 0 } },
+      "shares": { "accepted": 1287, "rejected": 4, "total": 1291 },
+      "pool": { "pool": "xel.kryptex.network:7019", "difficulty": 600000 }
+    }
+  ],
+  "gpu_devices": [{ "id": 0, "model": "AMD Radeon RX 7900 XT", "bus_id": "03:00.0", "temperature": 61 }]
+}

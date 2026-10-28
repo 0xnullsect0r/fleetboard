@@ -1,0 +1,30 @@
+# FLEETBOARD Monero view-only wallet RPC (compose profile "wallets").
+# Downloads the official Monero CLI, verifying binaryfate's signature on
+# hashes.txt and the tarball's SHA-256. Build from the repo root.
+FROM debian:bookworm-slim AS fetch
+ARG TARGETARCH
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl bzip2 gnupg \
+ && rm -rf /var/lib/apt/lists/*
+WORKDIR /tmp/monero
+RUN set -eux; \
+    case "${TARGETARCH:-amd64}" in amd64) a=x64 ;; arm64) a=armv8 ;; *) echo "unsupported $TARGETARCH"; exit 1 ;; esac; \
+    curl -fsSL https://www.getmonero.org/downloads/hashes.txt -o hashes.txt; \
+    curl -fsSL https://raw.githubusercontent.com/monero-project/monero/master/utils/gpg_keys/binaryfate.asc -o binaryfate.asc; \
+    export GNUPGHOME=/tmp/monero/gnupg; install -d -m 0700 "$GNUPGHOME"; gpg -q --import binaryfate.asc; \
+    gpg --status-fd 1 --verify hashes.txt 2>/dev/null | grep -q "VALIDSIG 81AC591FE9C4B65C5806AFC3F0AF4D462A0BDF92"; \
+    f="$(grep -oE "monero-linux-$a-v[0-9.]+\.tar\.bz2" hashes.txt | head -1)"; \
+    curl -fSL --retry 3 "https://downloads.getmonero.org/cli/$f" -o "$f"; \
+    grep " $f\$" hashes.txt | sha256sum -c -; \
+    tar -xjf "$f"; install -m 0755 monero-*/monero-wallet-cli monero-*/monero-wallet-rpc /usr/local/bin/
+
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd --system --uid 10001 --home-dir /data wallet && install -d -o wallet -g wallet -m 0700 /data
+COPY --from=fetch /usr/local/bin/monero-wallet-cli /usr/local/bin/monero-wallet-rpc /usr/local/bin/
+COPY infra/wallets/xmr-entrypoint.sh /usr/local/bin/entrypoint
+USER wallet
+VOLUME /data
+EXPOSE 18083
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
+CMD ["run"]

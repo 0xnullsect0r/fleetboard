@@ -1,0 +1,12 @@
+{
+  "id": "0f1a6c6d8e2b4f61",
+  "worker_id": "garuda-pc",
+  "version": "6.24.0",
+  "kind": "miner",
+  "ua": "XMRig/6.24.0 (Linux x86_64) libuv/1.48.0 gcc/13.2.0",
+  "cpu": { "brand": "AMD Ryzen 9 7950X 16-Core Processor", "aes": true, "x64": true, "cores": 16, "threads": 32 },
+  "algo": "rx/0",
+  "hashrate": { "total": [18421.7, 18366.2, 18302.9], "highest": 19012.4, "threads": [] },
+  "results": { "diff_current": 160001, "shares_good": 412, "shares_total": 415, "avg_time": 209, "hashes_total": 7716000000 },
+  "connection": { "pool": "127.0.0.1:3333", "ping": 0, "uptime": 86211 }
+}

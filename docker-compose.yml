@@ -38,10 +38,11 @@ services:
       XEL_WALLET_RPC: ${XEL_WALLET_RPC:-}
       XEL_WALLET_USER: ${XEL_WALLET_USER:-}
       XEL_WALLET_PASS: ${XEL_WALLET_RPC_PASS:-}
+      HISTORY_DAYS: ${HISTORY_DAYS:-90}
     depends_on:
       db:
         condition: service_healthy
-    networks: [fleet]
+    networks: [fleet, wallets]
 
   web:
     build:
@@ -78,10 +79,45 @@ services:
         condition: service_healthy
     networks: [fleet]
 
+  # Optional: wallets co-hosted on the server ("docker compose --profile wallets ...").
+  # Only the collector shares their network; web and caddy cannot reach them.
+  xmr-wallet:
+    profiles: [wallets]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.wallet-xmr
+    image: fleetboard-wallet-xmr:local
+    restart: unless-stopped
+    environment:
+      WALLET_PASSWORD: ${XMR_WALLET_PASSWORD:-}
+      XMR_NODE: ${DIFF_NODE:-xmr.support:18081}
+      RESTORE_HEIGHT: ${XMR_RESTORE_HEIGHT:-0}
+    volumes:
+      - xmr_wallet:/data
+    networks: [wallets]
+
+  xel-wallet:
+    profiles: [wallets]
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.wallet-xel
+    image: fleetboard-wallet-xel:local
+    restart: unless-stopped
+    environment:
+      WALLET_PASSWORD: ${XEL_WALLET_PASSWORD:-}
+      RPC_PASSWORD: ${XEL_WALLET_RPC_PASS:-}
+      XEL_DAEMON: ${XEL_DAEMON:-https://node.xelis.io}
+    volumes:
+      - xel_wallet:/data
+    networks: [wallets]
+
 networks:
   fleet: {}
+  wallets: {}
 
 volumes:
   pgdata: {}
   caddy_data: {}
   caddy_config: {}
+  xmr_wallet: {}
+  xel_wallet: {}

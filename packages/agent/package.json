@@ -1,0 +1,23 @@
+{
+  "name": "@fleetboard/agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Rig agent: reads local XMRig/SRBMiner APIs and wallet RPCs, pushes to the FLEETBOARD collector over an outbound WebSocket.",
+  "scripts": {
+    "build": "bun build src/index.ts --target=bun --outfile dist/fleet-agent.js",
+    "compile": "bun scripts/compile.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "mock-miners": "bun scripts/mock-miners.ts"
+  },
+  "dependencies": {
+    "@fleetboard/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.3",
+    "bun": "1.4.3",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}
