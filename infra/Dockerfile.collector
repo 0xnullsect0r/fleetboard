@@ -1,0 +1,34 @@
+# FLEETBOARD collector (Fastify WebSocket hub). Build from the repo root:
+#   docker build -f infra/Dockerfile.collector .
+ARG NODE_VERSION=24
+
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH COREPACK_ENABLE_DOWNLOAD_PROMPT=0 TURBO_TELEMETRY_DISABLED=1
+RUN corepack enable
+WORKDIR /repo
+
+FROM base AS prune
+COPY . .
+RUN pnpm dlx turbo@2.11.10 prune @fleetboard/collector --docker
+
+FROM base AS deps
+COPY --from=prune /repo/out/json/ .
+RUN pnpm install --frozen-lockfile
+
+FROM deps AS build
+COPY --from=prune /repo/out/full/ .
+COPY --from=prune /repo/tsconfig.base.json ./
+RUN pnpm turbo run build --filter=@fleetboard/collector
+# Self-contained prod tree: dist + migrations + prod node_modules (shared injected).
+RUN \
+    pnpm --filter @fleetboard/collector deploy --prod /deploy
+
+FROM node:${NODE_VERSION}-bookworm-slim AS runtime
+ENV NODE_ENV=production PORT=4000 HOST=0.0.0.0
+WORKDIR /app
+COPY --from=build --chown=node:node /deploy ./
+USER node
+EXPOSE 4000
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+CMD ["node", "dist/main.js"]

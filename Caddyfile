@@ -1,0 +1,27 @@
+# FLEETBOARD front door: one origin for the console, plus a plain agent port.
+
+# Console over HTTPS. A public name gets a Let's Encrypt cert; "localhost" or
+# an IP uses Caddy's internal CA; a *.ts.net name gets a Tailscale cert when
+# tailscaled's socket is mounted (see README).
+{$CADDY_SITE_ADDRESS:localhost} {
+	encode zstd gzip
+
+	handle /ws/* {
+		reverse_proxy collector:4000
+	}
+	handle {
+		reverse_proxy web:3000
+	}
+}
+
+# Agent ingress, plain ws:// on :8080. Meant to be reached over Tailscale
+# (WireGuard already encrypts it), so agents never fight cert trust or the
+# http->https redirect. Only /ws/agent is exposed here.
+http://:8080 {
+	handle /ws/agent {
+		reverse_proxy collector:4000
+	}
+	handle {
+		respond "fleetboard agent ingress" 404
+	}
+}

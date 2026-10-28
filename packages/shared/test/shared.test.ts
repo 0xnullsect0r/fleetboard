@@ -74,6 +74,11 @@ describe("computeEarnings", () => {
     expect(e.usdMonth).toBeCloseTo(e.usdDay * 30, 12);
   });
 
+  it("scales Bitcoin-style difficulty by hashesPerDiff", () => {
+    const e = computeEarnings(200e12, 100e12, 3.125, 1, 2 ** 32)!;
+    expect(e.coinDay).toBeCloseTo((200e12 * 86400 * 3.125) / (100e12 * 2 ** 32), 15);
+  });
+
   it("is undefined until inputs are known", () => {
     expect(computeEarnings(1, undefined, 0.6, 1)).toBeUndefined();
     expect(computeEarnings(1, 0, 0.6, 1)).toBeUndefined();

@@ -1,0 +1,35 @@
+# FLEETBOARD web (Next.js standalone). Build from the repo root:
+#   docker build -f infra/Dockerfile.web .
+ARG NODE_VERSION=24
+
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH NEXT_TELEMETRY_DISABLED=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 TURBO_TELEMETRY_DISABLED=1
+RUN corepack enable
+WORKDIR /repo
+
+# Reduce the monorepo to web + its workspace deps.
+FROM base AS prune
+COPY . .
+RUN pnpm dlx turbo@2.11.10 prune @fleetboard/web --docker
+
+# Install from the pruned lockfile only, so source edits keep this layer cached.
+FROM base AS deps
+COPY --from=prune /repo/out/json/ .
+RUN pnpm install --frozen-lockfile
+
+FROM deps AS build
+COPY --from=prune /repo/out/full/ .
+COPY --from=prune /repo/tsconfig.base.json ./
+RUN pnpm turbo run build --filter=@fleetboard/web
+
+FROM node:${NODE_VERSION}-bookworm-slim AS runtime
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
+WORKDIR /app
+COPY --from=build --chown=node:node /repo/apps/web/.next/standalone ./
+COPY --from=build --chown=node:node /repo/apps/web/.next/static ./apps/web/.next/static
+COPY --from=build --chown=node:node /repo/apps/web/public ./apps/web/public
+USER node
+EXPOSE 3000
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
+  CMD ["node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+CMD ["node", "apps/web/server.js"]

@@ -1,5 +1,6 @@
 import {
   COIN_IDS,
+  COINS,
   computeEarnings,
   type AgentMessage,
   type Coin,
@@ -144,7 +145,7 @@ export class FleetState {
     for (const coin of COIN_IDS) {
       const { price, diff, reward } = this.market.get(coin);
       const totalHr = miners.filter((m) => m.coin === coin && m.ok).reduce((s, m) => s + m.h60, 0);
-      const earnings = computeEarnings(totalHr, diff, reward, price);
+      const earnings = computeEarnings(totalHr, diff, reward, price, COINS[coin].hashesPerDiff);
       const coinWallets = wallets.filter((w) => w.coin === coin);
       const balance = coinWallets.length ? coinWallets.reduce((s, w) => s + w.balance, 0) : undefined;
       const balanceUsd = balance !== undefined && price !== undefined ? balance * price : undefined;

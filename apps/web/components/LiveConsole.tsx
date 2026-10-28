@@ -1,6 +1,6 @@
 "use client";
 
-import { COINS, SOURCES, type Coin, type CoinAgg, type MinerState, type Snapshot } from "@fleetboard/shared";
+import { COIN_IDS, COINS, SOURCES, type CoinAgg, type MinerState, type Snapshot } from "@fleetboard/shared";
 import { Sparkline } from "@/components/Sparkline";
 import { TopBar } from "@/components/TopBar";
 import { age, clock, coinAmount, hashrate, hashrateIn, price, shortAddress, si, usd } from "@/lib/format";
@@ -40,7 +40,7 @@ function CoinReadout({ agg, miners, trace }: { agg: CoinAgg; miners: MinerState[
   const algo = Object.values(SOURCES).find((s) => s.coin === coin)?.algo ?? "";
   const hr = hashrate(agg.totalHr);
   const stats: Array<[string, string]> = [
-    [`${coin}/DAY`, coinAmount(agg.earnings?.coinDay, coin === "XMR" ? 6 : 4)],
+    [`${coin}/DAY`, coinAmount(agg.earnings?.coinDay, coin === "XEL" ? 4 : 6)],
     ["USD/DAY", usd(agg.earnings?.usdDay)],
     ["DIFF", si(agg.diff)],
     ["REWARD", agg.reward !== undefined ? coinAmount(agg.reward, coin === "XMR" ? 2 : 4) : "—"],
@@ -249,8 +249,11 @@ export function LiveConsole({ seed }: { seed?: Trace }) {
       ) : (
         <main className="flex-1">
           <Hero snap={snap} />
-          <section className="grid grid-cols-1 border-b border-line lg:grid-cols-2 lg:divide-x lg:divide-line">
-            {(["XMR", "XEL"] as Coin[]).map((c) => (
+          <section
+            className="grid grid-cols-1 border-b border-line lg:grid-cols-[repeat(var(--coins),minmax(0,1fr))] lg:divide-x lg:divide-line"
+            style={{ "--coins": COIN_IDS.length } as React.CSSProperties}
+          >
+            {COIN_IDS.map((c) => (
               <CoinReadout key={c} agg={snap.coins[c]} miners={snap.miners} trace={trace[c]} />
             ))}
           </section>

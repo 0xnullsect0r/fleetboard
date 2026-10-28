@@ -1,0 +1,87 @@
+# FLEETBOARD, built from this checkout:  docker compose up -d --build
+# Servers that only deploy releases use the docker-compose.yml attached to each
+# GitHub Release instead (GHCR images, auto-updating). All config comes from .env.
+name: fleetboard
+
+x-db-url: &db-url ${DATABASE_URL:-postgres://${POSTGRES_USER:-fleetboard}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-fleetboard}}
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fleetboard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-fleetboard}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [fleet]
+
+  collector:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.collector
+    image: fleetboard-collector:local
+    restart: unless-stopped
+    environment:
+      TOKEN: ${TOKEN:?set TOKEN in .env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      DATABASE_URL: *db-url
+      DIFF_NODE: ${DIFF_NODE:-xmr.support:18081}
+      XEL_NODE: ${XEL_NODE:-https://node.xelis.io/json_rpc}
+      XMR_WALLET_RPC: ${XMR_WALLET_RPC:-}
+      XEL_WALLET_RPC: ${XEL_WALLET_RPC:-}
+      XEL_WALLET_USER: ${XEL_WALLET_USER:-}
+      XEL_WALLET_PASS: ${XEL_WALLET_RPC_PASS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [fleet]
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    image: fleetboard-web:local
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      DATABASE_URL: *db-url
+    depends_on:
+      collector:
+        condition: service_healthy
+    networks: [fleet]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    environment:
+      CADDY_SITE_ADDRESS: ${CADDY_SITE_ADDRESS:-localhost}
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:80:80"
+      - "${BIND_ADDR:-127.0.0.1}:443:443"
+      - "${BIND_ADDR:-127.0.0.1}:443:443/udp"
+      - "${BIND_ADDR:-127.0.0.1}:8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+      collector:
+        condition: service_healthy
+    networks: [fleet]
+
+networks:
+  fleet: {}
+
+volumes:
+  pgdata: {}
+  caddy_data: {}
+  caddy_config: {}

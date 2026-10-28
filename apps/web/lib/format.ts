@@ -1,4 +1,4 @@
-const HR_UNITS = ["H/s", "kH/s", "MH/s", "GH/s", "TH/s"] as const;
+const HR_UNITS = ["H/s", "kH/s", "MH/s", "GH/s", "TH/s", "PH/s"] as const;
 
 /** 49137 -> { value: "49.14", unit: "kH/s" } */
 export function hashrate(h: number, digits = 2): { value: string; unit: string } {
